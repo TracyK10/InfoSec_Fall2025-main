@@ -1,0 +1,79 @@
+<!-- Information Security Fall 2025 Lab - Base Template
+Short description: Shared HTML layout with CMU-themed styles and messages. -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or "Information Security Fall 2025 Lab" }}</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <div class="cmu-bar"></div>
+        <h1>
+          <a href="{{ url_for('index') }}"
+            >Information Security Fall 2025 Lab</a
+          >
+        </h1>
+        <span class="sub">CMU-Africa</span>
+      </div>
+      <nav class="nav">
+        {% if user %}
+        <span class="welcome">Hi, {{ user.name }}</span>
+        <a class="btn btn-outline" href="{{ url_for('dashboard') }}"
+          >Dashboard</a
+        >
+        <a class="btn" href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a class="btn" href="{{ url_for('login') }}">Login</a>
+        <a class="btn btn-outline" href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+      </nav>
+    </header>
+    <main class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flashes">
+        {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %} {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+      <p>
+        &copy; {{ 2025 }} Information Security Fall 2025 Lab • For educational
+        use only.
+      </p>
+    </footer>
+  <script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('.toggle-password').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      const wrap = btn.closest('.password-wrapper');
+      if (!wrap) return;
+      const input = wrap.querySelector('input[type="password"], input[type="text"]');
+      if (!input) return;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.setAttribute('aria-pressed', String(!showing));
+      btn.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+      btn.classList.toggle('is-visible', !showing);
+    });
+  });
+});
+</script>
+</body>
+</html>

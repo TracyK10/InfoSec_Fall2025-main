@@ -1,0 +1,333 @@
+/* 
+Information Security Fall 2025 Lab - Stylesheet
+Short description: CMU-themed styles (cardinal red, charcoal, light gray) and simple UI.
+*/
+
+/* General Styles */
+:root{
+  --cmu-red: #C41230;
+  --cmu-charcoal: #2E2E2E;
+  --cmu-gray: #F4F4F4;
+  --white: #FFFFFF;
+}
+
+*{ box-sizing: border-box; }
+html, body{
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: linear-gradient(120deg, var(--cmu-gray), #ffffff);
+  color: var(--cmu-charcoal);
+}
+
+.site-header{
+  background: var(--white);
+  border-bottom: 4px solid var(--cmu-red);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand h1{
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+}
+.brand h1 a{ color: var(--cmu-charcoal); text-decoration: none; }
+.brand .sub{ font-size: 12px; color: #6b6b6b; }
+.cmu-bar{
+  width: 60px; height: 6px; background: var(--cmu-red); border-radius: 3px; margin-bottom: 6px;
+}
+
+.nav .btn{ margin-left: 8px; }
+
+.container{
+  max-width: 920px;
+  margin: 32px auto;
+  padding: 0 20px;
+}
+
+.hero{
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--white);
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+.hero h2{ font-size: 28px; margin: 0 0 8px; }
+.hero .lede{ color: #5a5a5a; margin-bottom: 20px; }
+
+.card{
+  background: var(--white);
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.form{
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+label{ font-weight: 600; }
+input{
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  font-size: 14px;
+}
+input:focus{ outline: 2px solid var(--cmu-red); border-color: var(--cmu-red); }
+
+.form-group{
+  margin-bottom: 20px;
+}
+label{
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="file"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #fff;
+}
+
+.file-input {
+  padding: 8px 0;
+  border: 1px dashed #aaa;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  text-align: center;
+}
+
+.file-input:hover {
+  border-color: var(--cmu-red);
+  background-color: #fff5f7;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--cmu-red);
+  box-shadow: 0 0 0 2px rgba(196, 18, 48, 0.2);
+}
+
+.btn{
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--cmu-charcoal);
+  background: var(--cmu-red);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+.btn:hover { 
+  background: #a00f28; 
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.btn:active { 
+  background: #8a0c21; 
+  transform: translateY(0);
+  box-shadow: none;
+}
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.85em;
+}
+.btn-danger {
+  background: #dc3545;
+}
+.btn-danger:hover {
+  background: #c82333;
+}
+.btn-outline{
+  background: transparent;
+  border: 1px solid var(--cmu-charcoal);
+  color: var(--cmu-charcoal);
+}
+.btn-outline:hover { 
+  background: rgba(0,0,0,0.05); 
+  border-color: var(--cmu-red);
+  color: var(--cmu-red);
+}
+
+.actions{ display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
+
+.flashes{ margin-bottom: 16px; }
+.flash{
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.flash.success{
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.flash.error{
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.dashboard-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.welcome-section {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.welcome-section h2 {
+  color: var(--cmu-red);
+  margin-bottom: 10px;
+}
+
+.upload-section {
+  margin-bottom: 30px;
+}
+
+.file-list {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.file-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.file-table th,
+.file-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.file-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: var(--cmu-charcoal);
+}
+
+.file-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.inline-form {
+  display: inline-block;
+  margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .file-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.greeting{ font-size: 18px; font-weight: 600; }
+
+.site-footer{
+  text-align: center;
+  color: #777;
+  padding: 28px 0 40px;
+}
+
+
+
+/* Password visibility toggle */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  flex: 1;
+  padding-right: 40px; /* space for toggle button */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: inherit;
+}
+
+.toggle-password .icon-eye-off { display: none; }
+.toggle-password.is-visible .icon-eye { display: none; }
+.toggle-password.is-visible .icon-eye-off { display: inline; }

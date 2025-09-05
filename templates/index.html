@@ -1,0 +1,16 @@
+<!-- Information Security Fall 2025 Lab - Landing Page
+Short description: Welcome page with course message and CTAs to Login/Register. -->
+
+{% extends "base.html" %} {% block content %}
+<section class="hero">
+  <h2>Welcome to Information Security Course • Fall 2025</h2>
+  <p class="lede">
+    This lab template is branded for CMU-Africa and provides a simple, secure
+    starting point.
+  </p>
+  <div class="actions">
+    <a class="btn btn-primary" href="{{ url_for('login') }}">Login</a>
+    <a class="btn btn-secondary" href="{{ url_for('register') }}">Register</a>
+  </div>
+</section>
+{% endblock %}
