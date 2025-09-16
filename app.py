@@ -12,10 +12,16 @@ Routes:
 - GET /dashboard     : Greets authenticated user: "Hello {Name}, Welcome to Lab 0 of Information Security course. Enjoy!!!"
 - GET /logout        : Clear session and return to landing page.
 """
-from flask import Flask, request, redirect, render_template, session, url_for, flash, send_from_directory, abort
+
+# I collaborated with: John Waweru Muhura
+
+from flask import Flask, request, redirect, render_template, session, url_for, flash, send_from_directory, abort, send_file
 import sqlite3, os
 from datetime import datetime
 import uuid
+import io
+from werkzeug.security import generate_password_hash, check_password_hash
+from crypto_utils import load_key, encrypt_file, decrypt_file
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY", "change-me-in-production")
@@ -78,8 +84,11 @@ def register():
 
         conn = get_db()
         try:
+            # Hash the password before storing it
+            hashed_password = generate_password_hash(password)
             conn.execute(
-                f"INSERT INTO users (name, andrew_id, password) VALUES ('{name}', '{andrew_id}', '{password}')"
+                "INSERT INTO users (name, andrew_id, password) VALUES (?, ?, ?)",
+                (name, andrew_id, hashed_password)
             )
             conn.commit()
             flash("Registration successful! Please log in.", "success")
@@ -101,11 +110,10 @@ def login():
         password = request.form.get("password", "")
 
         conn = get_db()
-        query = f"SELECT * FROM users WHERE andrew_id = '{andrew_id}' AND password = '{password}'"
-        user = conn.execute(query).fetchone()
+        user = conn.execute("SELECT * FROM users WHERE andrew_id = ?", (andrew_id,)).fetchone()
         conn.close()
 
-        if user:
+        if user and check_password_hash(user['password'], password):
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             return redirect(url_for("dashboard"))
@@ -132,10 +140,50 @@ def dashboard():
                          user=user,
                          files=files)
 
-@app.route("/uploads/<path:filename>")
-def download_file(filename):
-    """Serve uploaded files for download."""
-    return send_from_directory(os.path.join(BASE_DIR, 'uploads'), filename, as_attachment=True)
+@app.route("/download/<int:file_id>")
+def download_file(file_id):
+    """Serve uploaded files for download after decryption."""
+    user = current_user()
+    if not user:
+        return redirect(url_for("login"))
+    
+    conn = get_db()
+    try:
+        # Get file info from database
+        file_info = conn.execute(
+            "SELECT * FROM files WHERE id = ?", (file_id,)
+        ).fetchone()
+        
+        if not file_info:
+            abort(404, "File not found")
+            
+        file_path = os.path.join(BASE_DIR, 'uploads', file_info['stored_filename'])
+        
+        # Read the encrypted file
+        with open(file_path, 'rb') as f:
+            encrypted_data = f.read()
+            
+        # Load the key and decrypt the file
+        key = load_key()
+        decrypted_data = decrypt_file(encrypted_data, key)
+        
+        # Create a file-like object from the decrypted data
+        file_obj = io.BytesIO(decrypted_data)
+        
+        # Send the decrypted file
+        return send_file(
+            file_obj,
+            as_attachment=True,
+            download_name=file_info['filename'],
+            mimetype='application/octet-stream'
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Error downloading file: {str(e)}")
+        flash('Error downloading file', 'error')
+        return redirect(url_for('dashboard'))
+    finally:
+        conn.close()
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -159,8 +207,24 @@ def upload_file():
         file_ext = os.path.splitext(original_filename)[1]
         stored_filename = f"{uuid.uuid4().hex}{file_ext}"
         
-        # Save file to uploads directory
-        file.save(os.path.join(BASE_DIR, 'uploads', stored_filename))
+        # Ensure uploads directory exists
+        os.makedirs(os.path.join(BASE_DIR, 'uploads'), exist_ok=True)
+        
+        # Read file data
+        file_data = file.read()
+        
+        try:
+            # Load the key and encrypt the file
+            key = load_key()
+            encrypted_data = encrypt_file(file_data, key)
+            
+            # Save the encrypted file
+            with open(os.path.join(BASE_DIR, 'uploads', stored_filename), 'wb') as f:
+                f.write(encrypted_data)
+        except Exception as e:
+            app.logger.error(f"Error encrypting file: {str(e)}")
+            flash('Error processing file', 'error')
+            return redirect(url_for('dashboard'))
         
         # Save file metadata to database
         conn = get_db()
@@ -224,8 +288,10 @@ if __name__ == "__main__":
     if not os.path.exists(DB_FILE):
         print("[*] Initializing database...")
         init_db()
-    else:
-        print("[*] Database already exists, skipping init.")
-
-    # Start Flask application
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    
+    # Ensure the uploads directory exists
+    uploads_dir = os.path.join(BASE_DIR, 'uploads')
+    os.makedirs(uploads_dir, exist_ok=True)
+    
+    # Run the app
+    app.run(debug=True, host="0.0.0.0", port=5000)
