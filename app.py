@@ -21,7 +21,9 @@ from datetime import datetime
 import uuid
 import io
 from werkzeug.security import generate_password_hash, check_password_hash
-from crypto_utils import load_key, encrypt_file, decrypt_file
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+from Crypto.Random import get_random_bytes
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY", "change-me-in-production")
@@ -62,6 +64,32 @@ def current_user():
     user = conn.execute("SELECT * FROM users WHERE id = ?", (uid,)).fetchone()
     conn.close()
     return user
+
+# ---------------- Crypto Utilities ----------------
+def load_key(key_file="secret_aes.key"):
+    """Load the AES-256 key from the provided file path."""
+    with open(key_file, "rb") as f:
+        return f.read()
+
+def encrypt_file(input_data: bytes, key: bytes) -> bytes:
+    """
+    Encrypt input_data using AES-256-CBC with PKCS#7 padding.
+    Returns IV (16 bytes) prepended to ciphertext.
+    """
+    iv = get_random_bytes(AES.block_size)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    ciphertext = cipher.encrypt(pad(input_data, AES.block_size))
+    return iv + ciphertext
+
+def decrypt_file(encrypted_data: bytes, key: bytes) -> bytes:
+    """
+    Decrypt data produced by encrypt_file (expects IV||ciphertext).
+    """
+    iv = encrypted_data[:AES.block_size]
+    ciphertext = encrypted_data[AES.block_size:]
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    plaintext_padded = cipher.decrypt(ciphertext)
+    return unpad(plaintext_padded, AES.block_size)
 
 # ---------------- Routes ----------------
 @app.route("/")
