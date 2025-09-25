@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Two-Factor Authentication{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Two-Factor Authentication</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5>How to get your verification code:</h5>
+                        <ol class="mb-0">
+                            <li>Open the <a href="{{ url_for('show_otp') }}" target="_blank">OTP Codes</a> page in a new tab</li>
+                            <li>Find the current 6-digit code (valid for 1 minute)</li>
+                            <li>Enter the code below</li>
+                        </ol>
+                    </div>
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <form method="POST" action="{{ url_for('two_factor') }}">
+                        <div class="mb-3">
+                            <label for="otp" class="form-label">Current OTP Code</label>
+                            <input type="text" class="form-control form-control-lg text-center" 
+                                   id="otp" name="otp" placeholder="Enter 6-digit code" 
+                                   required pattern="\d{6}" 
+                                   title="Please enter the 6-digit code from the OTP page"
+                                   autofocus>
+                        </div>
+                        <div class="actions">
+                          <button type="submit" class="btn btn-primary btn-lg flex-fill" style="min-width:220px;">
+                            <i class="fas fa-check-circle me-3"></i>Verify Code
+                          </button>
+                          <a href="{{ url_for('show_otp') }}" class="btn btn-secondary btn-lg flex-fill" style="min-width:220px;" target="_blank" rel="noopener">
+                            <i class="fas fa-key me-3"></i>View OTP Codes
+                          </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Each code is valid for 1 minute. The system will automatically use the current code.
+                    </p>
+                </div>
+            </div>
+        <div class="mt-4 text-center">
+          <p class="text-muted small mb-2">
+            <i class="fas fa-info-circle"></i> 
+            Can't access your authenticator app? 
+            <a href="{{ url_for('show_otp') }}" target="_blank">Get a code</a>.
+          </p>
+          <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left"></i> Back to Login
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .form-control {
+    letter-spacing: 0.2em;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-align: center;
+  }
+  .form-text {
+    font-size: 0.875rem;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-advance to next input
+  const otpInput = document.getElementById('otp');
+  if (otpInput) {
+    otpInput.focus();
+    
+    // Auto-submit when 6 digits are entered
+    otpInput.addEventListener('input', function(e) {
+      if (this.value.length === 6) {
+        this.form.submit();
+      }
+    });
+    
+    // Only allow numbers
+    otpInput.addEventListener('keypress', function(e) {
+      if (e.key < '0' || e.key > '9') {
+        e.preventDefault();
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

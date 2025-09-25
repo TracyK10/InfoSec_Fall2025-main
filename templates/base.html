@@ -17,6 +17,12 @@ Short description: Shared HTML layout with CMU-themed styles and messages. -->
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap"
       rel="stylesheet"
     />
+    <!-- Font Awesome for icons -->
+    <link 
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" 
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
   </head>
   <body>
     <header class="site-header">
@@ -31,14 +37,25 @@ Short description: Shared HTML layout with CMU-themed styles and messages. -->
       </div>
       <nav class="nav">
         {% if user %}
-        <!-- <span class="welcome">Hi, {{ user.name }}</span> -->
-        <a class="btn btn-outline" href="{{ url_for('dashboard') }}"
-          >Dashboard</a
-        >
-        <a class="btn" href="{{ url_for('logout') }}">Logout</a>
+        <span class="welcome">Hi, {{ user.name }}</span>
+        <a class="btn btn-outline" href="{{ url_for('dashboard') }}">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        {% if session.get('authenticated') %}
+        <a class="btn btn-outline" href="{{ url_for('show_otp') }}" title="View OTPs (for debugging)">
+          <i class="fas fa-key"></i> My OTPs
+        </a>
+        {% endif %}
+        <a class="btn" href="{{ url_for('logout') }}">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
         {% else %}
-        <a class="btn" href="{{ url_for('login') }}">Login</a>
-        <a class="btn btn-outline" href="{{ url_for('register') }}">Register</a>
+        <a class="btn" href="{{ url_for('login') }}">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+        <a class="btn btn-outline" href="{{ url_for('register') }}">
+          <i class="fas fa-user-plus"></i> Register
+        </a>
         {% endif %}
       </nav>
     </header>
