@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h2>
+            <i class="fas fa-users-cog"></i> 
+            {% if user.role == ROLE_USER_ADMIN %}
+                User Management
+            {% elif user.role == ROLE_DATA_ADMIN %}
+                File Management
+            {% endif %}
+        </h2>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_logs') }}" class="btn btn-outline">
+                <i class="fas fa-file-alt"></i> View Audit Logs
+            </a>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if user.role == ROLE_USER_ADMIN %}
+        <!-- User Admin Interface -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-user-plus"></i> Create New User</h5>
+            </div>
+            <form method="POST" action="{{ url_for('admin_create_user') }}">
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-col">
+                        <label for="andrew_id">Andrew ID</label>
+                        <input type="text" id="andrew_id" name="andrew_id" required>
+                    </div>
+                    <div class="form-col">
+                        <label for="password">Temporary Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <div class="form-col">
+                        <label for="role">Role</label>
+                        <select id="role" name="role" required>
+                            <option value="{{ ROLE_BASIC }}">Basic User</option>
+                            <option value="{{ ROLE_USER_ADMIN }}">User Admin</option>
+                            <option value="{{ ROLE_DATA_ADMIN }}">Data Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Create
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Users List -->
+        <div class="card">
+            <div class="card-header bg-secondary">
+                <h5><i class="fas fa-users"></i> All Users</h5>
+            </div>
+            {% if users %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Andrew ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                                <tr>
+                                    <td><code>{{ u.andrew_id }}</code></td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin_change_username') }}" class="inline-flex">
+                                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                                            <input type="text" class="form-control" name="name" value="{{ u.name }}">
+                                            <button type="submit" class="btn btn-sm btn-outline" title="Update name">
+                                                <i class="fas fa-save"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin_assign_role') }}" class="inline-flex">
+                                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                                            <select class="form-select" name="role">
+                                                <option value="{{ ROLE_BASIC }}" {% if u.role == ROLE_BASIC %}selected{% endif %}>Basic</option>
+                                                <option value="{{ ROLE_USER_ADMIN }}" {% if u.role == ROLE_USER_ADMIN %}selected{% endif %}>User Admin</option>
+                                                <option value="{{ ROLE_DATA_ADMIN }}" {% if u.role == ROLE_DATA_ADMIN %}selected{% endif %}>Data Admin</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-outline" title="Update role">
+                                                <i class="fas fa-save"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>{{ u.created_at }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ url_for('admin_delete_user') }}" class="inline-form" onsubmit="return handleDeleteClick(event, {{ u.id }}, '{{ user.id }}', '{{ u.andrew_id }}');">
+                                            <input type="hidden" name="user_id" value="{{ u.id }}">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% if u.id == user.id %}
+                                    <tr style="background-color: #f8f9fa;">
+                                        <td colspan="5" style="text-align: center; padding: 8px; font-size: 13px; color: #6c757d;">
+                                            <i class="fas fa-shield-alt"></i> <strong>Current User</strong> - Protected from deletion
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center">No users found.</p>
+            {% endif %}
+        </div>
+
+    {% elif user.role == ROLE_DATA_ADMIN %}
+        <!-- Data Admin Interface -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-upload"></i> Upload File</h5>
+            </div>
+            <form method="POST" action="{{ url_for('admin_upload_file') }}" enctype="multipart/form-data">
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="file">Select File</label>
+                        <input type="file" id="file" name="file" required>
+                    </div>
+                    <div class="form-col">
+                        <label for="target_user">Upload for User</label>
+                        <input type="text" id="target_user" name="target_user" 
+                               placeholder="Andrew ID" value="{{ user.andrew_id }}">
+                    </div>
+                    <div class="form-col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Global Files List -->
+        <div class="card">
+            <div class="card-header bg-secondary">
+                <h5><i class="fas fa-folder-open"></i> All Files</h5>
+            </div>
+            {% if files %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Filename</th>
+                                <th>Owner</th>
+                                <th>Uploaded</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for file in files %}
+                                <tr>
+                                    <td><i class="fas fa-file"></i> {{ file.filename }}</td>
+                                    <td><code>{{ file.owner_andrew_id }}</code> ({{ file.owner_name }})</td>
+                                    <td>{{ file.upload_timestamp }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_download_file', file_id=file.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-download"></i> Download
+                                        </a>
+                                        <form method="POST" action="{{ url_for('admin_delete_file', file_id=file.id) }}" 
+                                              class="inline-form" onsubmit="return confirm('Are you sure you want to delete {{ file.filename }}?');">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center">No files found.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<script>
+function handleDeleteClick(event, targetUserId, currentUserId, targetAndrewId) {
+    // Convert to numbers for comparison
+    const targetId = parseInt(targetUserId);
+    const currentId = parseInt(currentUserId);
+    
+    // Check if trying to delete self
+    if (targetId === currentId) {
+        // Show warning but ALLOW the form to submit so it gets logged on the server
+        alert('You cannot delete your own account. This action is protected and will be logged.');
+        // Return true to allow form submission - the server will handle denial and logging
+        return true;
+    }
+    
+    // Otherwise, show normal confirmation dialog
+    return confirm(`Are you sure you want to delete user ${targetAndrewId}?`);
+}
+</script>
+{% endblock %}

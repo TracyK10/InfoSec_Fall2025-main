@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h2><i class="fas fa-file-alt"></i> Audit Logs</h2>
+        <a href="{{ url_for('admin_users') }}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Admin Panel
+        </a>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-dark">
+            <h5><i class="fas fa-history"></i> Security Audit Trail (Last 200 Actions)</h5>
+        </div>
+        
+        {% if logs %}
+            <div class="table-responsive">
+                <table class="table" id="auditTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable-header" onclick="sortTable(0)">
+                                Time (UTC) <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable-header" onclick="sortTable(1)">
+                                Actor <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable-header" onclick="sortTable(2)">
+                                Action <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable-header" onclick="sortTable(3)">
+                                Target <i class="fas fa-sort"></i>
+                            </th>
+                            <th class="sortable-header" onclick="sortTable(4)">
+                                Outcome <i class="fas fa-sort"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                            <tr>
+                                <td>
+                                    <span class="audit-time">
+                                        <i class="fas fa-clock"></i> {{ log.created_at }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <code>{{ log.actor_andrew_id }}</code>
+                                </td>
+                                <td>
+                                    <span class="badge badge-info">{{ log.action }}</span>
+                                </td>
+                                <td>
+                                    {% if log.target and log.target != 'N/A' %}
+                                        <code>{{ log.target }}</code>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if log.outcome == 'allowed' %}
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check-circle"></i> Allowed
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-danger">
+                                            <i class="fas fa-times-circle"></i> Denied
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i> No audit logs found. Admin actions will appear here.
+            </div>
+        {% endif %}
+        
+        <div class="card-footer">
+            <i class="fas fa-shield-alt"></i> All administrative actions are logged for security and compliance purposes.
+        </div>
+    </div>
+</div>
+
+<script>
+// Simple table sorting functionality
+let sortDirections = [true, true, true, true, true]; // true = ascending, false = descending
+
+function sortTable(columnIndex) {
+    const table = document.getElementById("auditTable");
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+    
+    const isAscending = sortDirections[columnIndex];
+    
+    rows.sort((a, b) => {
+        const cellA = a.cells[columnIndex].textContent.trim();
+        const cellB = b.cells[columnIndex].textContent.trim();
+        
+        if (cellA < cellB) {
+            return isAscending ? -1 : 1;
+        }
+        if (cellA > cellB) {
+            return isAscending ? 1 : -1;
+        }
+        return 0;
+    });
+    
+    // Toggle sort direction for next click
+    sortDirections[columnIndex] = !isAscending;
+    
+    // Clear and re-append sorted rows
+    tbody.innerHTML = "";
+    rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+{% endblock %}

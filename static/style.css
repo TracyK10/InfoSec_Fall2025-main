@@ -180,6 +180,26 @@ textarea:focus {
   color: var(--cmu-red);
 }
 
+.btn-primary {
+  background: var(--cmu-red);
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #a00f28;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
 .actions{ display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
 
 .flashes{ margin-bottom: 16px; }
@@ -261,15 +281,227 @@ textarea:focus {
   background-color: #f9f9f9;
 }
 
-.actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-}
-
 .inline-form {
   display: inline-block;
   margin: 0;
+}
+
+/* Admin Styles */
+.admin-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.admin-header h2 {
+  margin: 0;
+  color: var(--cmu-charcoal);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.alert-info {
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.card-header {
+  background-color: var(--cmu-red);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 12px 12px 0 0;
+  margin: -24px -24px 20px -24px;
+}
+
+.card-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-header.bg-secondary {
+  background-color: #6c757d;
+}
+
+.card-header.bg-dark {
+  background-color: var(--cmu-charcoal);
+}
+
+.card-footer {
+  background-color: #f8f9fa;
+  padding: 12px 20px;
+  border-radius: 0 0 12px 12px;
+  margin: 20px -24px -24px -24px;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  margin: 15px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.table thead th {
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table tbody td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table code {
+  background-color: #f8f9fa;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.table td form {
+  margin: 0;
+}
+
+.table td .form-control,
+.table td .form-select {
+  display: inline-block;
+  padding: 6px 10px;
+  font-size: 14px;
+}
+
+.table td .inline-flex {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+}
+
+.form-col {
+  flex: 1;
+}
+
+.form-col label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.form-col input,
+.form-col select {
+  width: 100%;
+}
+
+.form-col-auto {
+  flex: 0 0 auto;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.badge-info {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.text-muted {
+  color: #6c757d;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.sortable-header:hover {
+  background-color: #e9ecef;
+}
+
+.audit-time {
+  font-size: 13px;
+  color: #6c757d;
 }
 
 /* Responsive adjustments */
@@ -289,6 +521,29 @@ textarea:focus {
     width: 100%;
     text-align: center;
   }
+
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-col-auto {
+    width: 100%;
+  }
+
+  .form-col-auto .btn {
+    width: 100%;
+  }
 }
 
 .greeting{ font-size: 18px; font-weight: 600; }
@@ -298,8 +553,6 @@ textarea:focus {
   color: #777;
   padding: 28px 0 40px;
 }
-
-
 
 /* Password visibility toggle */
 .password-wrapper {

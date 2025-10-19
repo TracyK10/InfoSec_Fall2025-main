@@ -23,19 +23,20 @@
             <label for="andrew_id" class="form-label">
               <i class="fas fa-user"></i> Andrew ID
             </label>
-            <div class="input-group">
-              <span class="input-group-text">@andrew.cmu.edu</span>
-              <input
-                id="andrew_id"
-                name="andrew_id"
-                type="text"
-                class="form-control"
-                required
-                placeholder="jdoe"
-                autocomplete="username"
-                autofocus
-              >
-            </div>
+            <input
+              id="andrew_id"
+              name="andrew_id"
+              type="text"
+              class="form-control"
+              required
+              placeholder="Enter your Andrew ID"
+              autocomplete="username"
+              autofocus
+              value="{{ andrew_id or '' }}"
+              pattern="[a-zA-Z0-9_]+"
+              title="Andrew ID can only contain letters, numbers, and underscores"
+            >
+            <div class="form-text">Enter your Andrew ID (e.g., jdoe)</div>
           </div>
           
           <div class="mb-3">
