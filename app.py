@@ -425,6 +425,9 @@ def login():
         user = conn.execute("SELECT * FROM users WHERE andrew_id = ?", (andrew_id,)).fetchone()
         
         if user and check_password_hash(user['password'], password):
+            # IMPORTANT: Ensure valid OTPs before proceeding to 2FA
+            ensure_valid_otps(user['id'])
+            
             session["pending_user_id"] = user["id"]
             session["pending_user_name"] = user["name"]
             session["next_url"] = next_url
@@ -501,6 +504,57 @@ def two_factor():
     finally:
         conn.close()
 
+def ensure_valid_otps(user_id):
+    """Ensure user has valid OTPs for the current time and future."""
+    conn = get_db()
+    try:
+        now = datetime.now(timezone.utc)
+        current_ts = now.strftime("%Y%m%d%H%M")
+        
+        # Check if we have valid OTPs for the next hour
+        future_ts = (now + timedelta(hours=1)).strftime("%Y%m%d%H%M")
+        
+        existing_otps = conn.execute(
+            """SELECT COUNT(*) as count FROM otp_chain 
+               WHERE user_id = ? AND timestamp >= ? AND timestamp <= ?""",
+            (user_id, current_ts, future_ts)
+        ).fetchone()
+        
+        # If we have fewer than 60 OTPs for the next hour, regenerate
+        if existing_otps['count'] < 60:
+            # Get user's OTP secret
+            user = conn.execute(
+                "SELECT otp_secret FROM users WHERE id = ?", (user_id,)
+            ).fetchone()
+            
+            if not user or not user['otp_secret']:
+                return False
+            
+            # Delete old OTPs
+            conn.execute("DELETE FROM otp_chain WHERE user_id = ?", (user_id,))
+            
+            # Generate new OTPs for next 24 hours
+            otps = generate_otp_chain(user_id, user['otp_secret'], 1440)
+            timestamps = [(now + timedelta(minutes=i)).strftime("%Y%m%d%H%M") 
+                         for i in range(1440)]
+            
+            conn.executemany(
+                """INSERT INTO otp_chain (user_id, timestamp, otp_code, used)
+                   VALUES (?, ?, ?, 0)""",
+                [(user_id, ts, otp) for ts, otp in zip(timestamps, otps)]
+            )
+            
+            conn.commit()
+            return True
+        
+        return True
+        
+    except Exception as e:
+        app.logger.error(f"Error ensuring valid OTPs: {str(e)}")
+        return False
+    finally:
+        conn.close()
+
 @app.route("/show-otp")
 def show_otp():
     """Show the current and upcoming OTPs for the logged-in user."""
@@ -518,6 +572,9 @@ def show_otp():
     if not user_id:
         flash("Please log in first.", "error")
         return redirect(url_for("login", next=url_for("show_otp")))
+    
+    # Ensure valid OTPs exist
+    ensure_valid_otps(user_id)
     
     conn = get_db()
     try:
